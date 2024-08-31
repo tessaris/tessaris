@@ -54,7 +54,7 @@ func makeMiddlewareCmd(stdin io.Reader, stdout, stderr io.Writer, args []string)
 	return 0
 }
 
-func makeCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) int {
+func (c *Cli) makeCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) int {
 	if len(args) < 1 {
 		fmt.Fprint(stderr, makeHintText)
 

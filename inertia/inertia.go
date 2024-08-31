@@ -18,11 +18,7 @@ func CreateInertiaClient() *inertia.Inertia {
 	return i
 }
 
-type InertiaServer struct {
-	p *os.Process
-}
-
-func RunInertiaServer(p chan<- *os.Process) {
+func RunInertiaServer() {
 	cmd := exec.Command("node", "../../bootstrap/ssr/ssr.js")
 	cmd.Dir = "./resources/js"
 
@@ -36,15 +32,8 @@ func RunInertiaServer(p chan<- *os.Process) {
 	}
 
 	defer cmd.Process.Kill()
-
-	p <- cmd.Process
 }
 
-func CreateInertiaServer() *InertiaServer {
-	pChan := make(chan *os.Process)
-
-	go RunInertiaServer(pChan)
-	p := <-pChan
-
-	return &InertiaServer{p}
+func CreateInertiaServer() {
+	go RunInertiaServer()
 }

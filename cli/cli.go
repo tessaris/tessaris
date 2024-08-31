@@ -9,17 +9,25 @@ import (
 	"github.com/tesseris-go/tesseris/router"
 )
 
-func Run() {
-	code := parseCmd(os.Stdin, os.Stdout, os.Stderr, os.Args)
+type Cli struct {
+	t *tesseris.Tesseris
+}
+
+func New(t *tesseris.Tesseris) *Cli {
+	return &Cli{t}
+}
+
+func (c *Cli) Run() {
+	code := c.parseCmd(os.Stdin, os.Stdout, os.Stderr, os.Args)
 
 	if code != 0 {
 		os.Exit(code)
 	}
 }
 
-func serveCmd() int {
+func (c *Cli) serveCmd() int {
 	r := router.New()
-	r.Serve()
+	r.Serve(c.t.Routes)
 
 	return 0
 }
@@ -36,7 +44,7 @@ Commands:
   serve      Starts the server
 `
 
-func parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) (code int) {
+func (c *Cli) parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) (code int) {
 	if len(args) < 2 {
 		fmt.Fprint(stderr, hintText)
 		return 0
@@ -44,9 +52,9 @@ func parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) (code in
 
 	switch args[1] {
 	case "serve":
-		return serveCmd()
+		return c.serveCmd()
 	case "make":
-		return makeCmd(stdin, stdout, stderr, args[2:])
+		return c.makeCmd(stdin, stdout, stderr, args[2:])
 	case "version", "--version":
 		fmt.Fprintln(stdout, tesseris.Version())
 		return 0

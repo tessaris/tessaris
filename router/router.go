@@ -9,30 +9,46 @@ import (
 )
 
 type Router struct {
-	mux   *http.ServeMux
-	in    *inertiaGo.Inertia
-	inSer *inertia.InertiaServer
+	mux *http.ServeMux
+	in  *inertiaGo.Inertia
+}
+
+type InertiaProps map[string]interface{}
+
+type InertiaRoute struct {
+	Path  string
+	Page  string
+	Props InertiaProps
 }
 
 func New() *Router {
-	router := &Router{
-		mux:   http.NewServeMux(),
-		in:    inertia.CreateInertiaClient(),
-		inSer: inertia.CreateInertiaServer(),
+	r := &Router{
+		mux: http.NewServeMux(),
+		in:  inertia.CreateInertiaClient(),
 	}
 
-	return router
+	return r
 }
 
-func (router *Router) homeHandler(w http.ResponseWriter, r *http.Request) {
-	err := router.in.Render(w, r, "home", nil)
-	if err != nil {
-		fmt.Println(err)
+func (r *Router) registerRoute(route InertiaRoute) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		err := r.in.Render(w, req, route.Page, route.Props)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
-func (r *Router) Serve() {
-	r.mux.HandleFunc("/", r.homeHandler)
+func (r *Router) RegisterRoutes(routes []InertiaRoute) {
+	for _, route := range routes {
+		r.mux.HandleFunc(route.Path, r.registerRoute(route))
+	}
+}
+
+func (r *Router) Serve(routes []InertiaRoute) {
+	inertia.CreateInertiaServer()
+	r.RegisterRoutes(routes)
 
 	// Serve static files from the resources folder
 	r.mux.Handle("/__assets/", http.StripPrefix("/__assets/", http.FileServer(http.Dir(".."))))
