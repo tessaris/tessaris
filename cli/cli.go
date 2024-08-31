@@ -45,14 +45,8 @@ func parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) (code in
 	switch args[1] {
 	case "serve":
 		return serveCmd()
-	// case "info":
-	// 	return infoCmd(stdout, stderr, args[2:])
-	// case "generate":
-	// 	return generateCmd(stdout, stderr, args[2:])
-	// case "fmt":
-	// 	return fmtCmd(stdin, stdout, stderr, args[2:])
-	// case "lsp":
-	// 	return lspCmd(stdin, stdout, stderr, args[2:])
+	case "make":
+		return makeCmd(stdin, stdout, stderr, args[2:])
 	case "version", "--version":
 		fmt.Fprintln(stdout, tesseris.Version())
 		return 0

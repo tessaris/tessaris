@@ -41,10 +41,10 @@ func RunInertiaServer(p chan<- *os.Process) {
 }
 
 func CreateInertiaServer() *InertiaServer {
-	p_chan := make(chan *os.Process)
+	pChan := make(chan *os.Process)
 
-	go RunInertiaServer(p_chan)
-	p := <-p_chan
+	go RunInertiaServer(pChan)
+	p := <-pChan
 
 	return &InertiaServer{p}
 }
