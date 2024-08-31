@@ -33,7 +33,3 @@ func RunInertiaServer() {
 
 	defer cmd.Process.Kill()
 }
-
-func CreateInertiaServer() {
-	go RunInertiaServer()
-}

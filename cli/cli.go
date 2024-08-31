@@ -25,23 +25,25 @@ func (c *Cli) Run() {
 	}
 }
 
-func (c *Cli) serveCmd() int {
-	r := router.New()
+func (c *Cli) serveCmd(prod bool) int {
+	r := router.New(prod)
 	r.Serve(c.t.Routes)
 
 	return 0
 }
 
-const hintText = `Usage: sh tesseris <command> [<args>...]
+const hintText = `Usage: ./tesseris <command> [<args>...]
 
 Tesseris - batteries included framework for Go
 
-See docs at https://tesseris.dev/docs
+See docs at https://tesseris.iskandervdh.nl/docs
 
 Commands:
-  info       Displays information about the tesseris environment
+  help       Displays information about the tesseris environment
   version    Prints the version
-  serve      Starts the server
+  serve      Starts the development server
+  prod       Starts the production server
+
 `
 
 func (c *Cli) parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) (code int) {
@@ -52,7 +54,9 @@ func (c *Cli) parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string)
 
 	switch args[1] {
 	case "serve":
-		return c.serveCmd()
+		return c.serveCmd(false)
+	case "prod":
+		return c.serveCmd(true)
 	case "make":
 		return c.makeCmd(stdin, stdout, stderr, args[2:])
 	case "version", "--version":
