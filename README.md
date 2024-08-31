@@ -2,24 +2,19 @@
 
 ## Documentation
 
-See documentation at https://tesseris.dev/docs
+See documentation at https://tesseris.iskandervdh.nl/docs
 
 ## Releasing a new version
 
-### Build
+First commit all changes and push them to the repository.
 
-Build a new version.
+Afterwards the version number can be updated based on what kind of version update it is:
 
 ```sh
-# Update the version number based on what kind of version you want to release
 go run ./next-version [patch|minor|major]
-
-# TODO: make build command
-cd cmd/tesseris
-go build
 ```
 
-### Add tag
+Then the version tag can be added to the repository using the following command:
 
 ```sh
 ./add-version-tag.sh
