@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/iskandervdh/tesseris/inertia"
 	inertiaGo "github.com/petaki/inertia-go"
+	"github.com/tesseris-go/tesseris/inertia"
 )
 
 type Router struct {

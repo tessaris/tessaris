@@ -1,4 +1,4 @@
-module github.com/iskandervdh/tesseris
+module github.com/tesseris-go/tesseris
 
 go 1.23.0
 

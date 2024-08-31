@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/iskandervdh/tesseris"
-	"github.com/iskandervdh/tesseris/router"
+	"github.com/tesseris-go/tesseris"
+	"github.com/tesseris-go/tesseris/router"
 )
 
 func Run() {
