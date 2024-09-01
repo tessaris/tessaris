@@ -1,4 +1,4 @@
-package tesseris
+package version
 
 import _ "embed"
 

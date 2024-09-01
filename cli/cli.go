@@ -5,16 +5,17 @@ import (
 	"io"
 	"os"
 
-	"github.com/tesseris-go/tesseris"
+	"github.com/tesseris-go/tesseris/config"
 	"github.com/tesseris-go/tesseris/router"
+	"github.com/tesseris-go/tesseris/version"
 )
 
 type Cli struct {
-	t *tesseris.Tesseris
+	cfg *config.Config
 }
 
-func New(t *tesseris.Tesseris) *Cli {
-	return &Cli{t}
+func New(cfg *config.Config) *Cli {
+	return &Cli{cfg}
 }
 
 func (c *Cli) Run() {
@@ -26,8 +27,8 @@ func (c *Cli) Run() {
 }
 
 func (c *Cli) serveCmd(prod bool) int {
-	r := router.New(prod)
-	r.Serve(c.t.Routes)
+	r := router.New(prod, c.cfg)
+	r.Serve(c.cfg.Routes)
 
 	return 0
 }
@@ -60,7 +61,7 @@ func (c *Cli) parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string)
 	case "make":
 		return c.makeCmd(stdin, stdout, stderr, args[2:])
 	case "version", "--version":
-		fmt.Fprintln(stdout, tesseris.Version())
+		fmt.Fprintln(stdout, version.Version())
 		return 0
 	case "help", "-help", "--help", "-h":
 		fmt.Fprint(stdout, hintText)
