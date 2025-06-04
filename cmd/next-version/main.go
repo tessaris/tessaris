@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	data, err := os.ReadFile("./.version")
+	data, err := os.ReadFile("./version/.version")
 
 	if err != nil {
 		fmt.Println("Error reading file:", err)
@@ -52,5 +52,5 @@ func main() {
 
 	version := fmt.Sprintf("%d.%d.%d", majorInt, minorInt, patchInt)
 
-	os.WriteFile(".version", []byte(version), 0644)
+	os.WriteFile("./version/.version", []byte(version), 0644)
 }

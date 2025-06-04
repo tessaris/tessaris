@@ -9,7 +9,7 @@ fi
 # Update the local repository just in case
 git pull
 
-VERSION=`cat .version`
+VERSION=`cat version/.version`
 echo Adding git tag with version v${VERSION};
 git tag v${VERSION};
 git push origin v${VERSION};
