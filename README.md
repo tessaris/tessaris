@@ -1,8 +1,8 @@
-# Tesseris - Batteries included framework for Go
+# Tessaris - Batteries included framework for Go
 
 ## Documentation
 
-See documentation at https://tesseris.iskandervdh.nl/docs
+See documentation at https://tessaris.dev/docs
 
 ## Releasing a new version
 
@@ -19,5 +19,3 @@ Then the version tag can be added to the repository using the following command:
 ```sh
 ./add-version-tag.sh
 ```
-
-

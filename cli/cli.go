@@ -5,17 +5,18 @@ import (
 	"io"
 	"os"
 
-	"github.com/tesseris-go/tesseris/config"
-	"github.com/tesseris-go/tesseris/router"
-	"github.com/tesseris-go/tesseris/version"
+	"github.com/tessaris/tessaris/app"
+	"github.com/tessaris/tessaris/config"
+	"github.com/tessaris/tessaris/router"
+	"github.com/tessaris/tessaris/version"
 )
 
 type Cli struct {
-	cfg *config.Config
+	app *app.App
 }
 
-func New(cfg *config.Config) *Cli {
-	return &Cli{cfg}
+func New(routes router.Routes) *Cli {
+	return &Cli{app.New(config.New(), routes)}
 }
 
 func (c *Cli) Run() {
@@ -27,24 +28,33 @@ func (c *Cli) Run() {
 }
 
 func (c *Cli) serveCmd(prod bool) int {
-	r := router.New(prod, c.cfg)
-	r.Serve(c.cfg.Routes)
+	r := router.New(prod, c.app.Config)
+	r.Serve(c.app.Routes)
 
 	return 0
 }
 
-const hintText = `Usage: ./tesseris <command> [<args>...]
+func (c *Cli) routesCmd() int {
+	r := router.New(false, c.app.Config)
+	r.ListRoutes(c.app.Routes)
 
-Tesseris - batteries included framework for Go
+	return 0
+}
 
-See docs at https://tesseris.iskandervdh.nl/docs
+const hintText = `Usage: ./tessaris <command> [<args>...]
+
+Tessaris - batteries included framework for Go
+
+See docs at https://tessaris.dev/daocs
 
 Commands:
-  help       Displays information about the tesseris environment
+  help       Displays information about the tessaris environment
   version    Prints the version
+
   serve      Starts the development server
   prod       Starts the production server
 
+  routes     List the routes
 `
 
 func (c *Cli) parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string) (code int) {
@@ -60,6 +70,8 @@ func (c *Cli) parseCmd(stdin io.Reader, stdout, stderr io.Writer, args []string)
 		return c.serveCmd(true)
 	case "make":
 		return c.makeCmd(stdin, stdout, stderr, args[2:])
+	case "routes":
+		return c.routesCmd()
 	case "version", "--version":
 		fmt.Fprintln(stdout, version.Version())
 		return 0

@@ -1,13 +1,16 @@
 package inertia
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
+	"net/url"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 
-	"github.com/tesseris-go/tesseris/utils"
+	"github.com/tessaris/tessaris/utils"
 )
 
 type Record map[string]string
@@ -65,6 +68,7 @@ func (v *Vite) makeStylesheetTagWithAttributes(url string, attributes Record) st
 			if v.nonce != nil {
 				return *v.nonce
 			}
+
 			return ""
 		}(),
 	}
@@ -90,6 +94,7 @@ func (v *Vite) resolveStylesheetTagAttributes(src, url string, chunk, manifest R
 
 	for _, resolver := range v.styleTagAttributesResolvers {
 		resolverAttributes := resolver(src, url, chunk, manifest)
+
 		for key, value := range resolverAttributes {
 			attributes[key] = value
 		}
@@ -106,6 +111,7 @@ func (v *Vite) makeScriptTagWithAttributes(url string, attributes Record) string
 			if v.nonce != nil {
 				return *v.nonce
 			}
+
 			return ""
 		}(),
 	}
@@ -153,10 +159,32 @@ func (v *Vite) makeTagForChunk(src, url string, chunk, manifest Record) string {
 	)
 }
 
-func (v *Vite) ViteTags(entrypoints []string) string {
-	eps := append([]string{"@vite/client"}, entrypoints...)
+func (v *Vite) getChunkFromManifest(manifest Manifest, entrypoint string) string {
+	chunk, exists := manifest[entrypoint]
 
+	if !exists {
+		return ""
+	}
+
+	tags := ""
+
+	if chunk.Css != nil {
+		tags = strings.Join(utils.Map(chunk.Css, func(css string) string {
+			assetUrl := path.Join(v.buildDirectory, css)
+
+			return v.makeTagForChunk(entrypoint, assetUrl, nil, nil)
+		}), "\n") + "\n"
+	}
+
+	assetUrl := path.Join(v.buildDirectory, chunk.File)
+
+	return tags + v.makeTagForChunk(entrypoint, assetUrl, nil, nil)
+}
+
+func (v *Vite) ViteTags(entrypoints []string) string {
 	if !v.prod {
+		eps := append([]string{"@vite/client"}, entrypoints...)
+
 		tags := utils.Map(eps, func(entrypoint string) string {
 			return v.makeTagForChunk(entrypoint, v.hotAsset(entrypoint), nil, nil)
 		})
@@ -164,21 +192,39 @@ func (v *Vite) ViteTags(entrypoints []string) string {
 		return strings.Join(tags, "\n")
 	}
 
-	// TODO: Implement production tags or maybe just keep using generated bootstrap ssr
+	manifestPath := path.Join(v.publicPath, v.buildDirectory, "manifest.json")
 
-	// Steps:
-	// 1. Read manifest.json
-	// 2. Read entrypoints from manifest.json
-	// 3. Generate tags for each entrypoint
-	// 4. Return tags
+	manifestFile, err := os.ReadFile(manifestPath)
 
-	// manifestPath := v.buildDirectory + "/manifest.json"
+	if err != nil {
+		fmt.Println(err)
 
-	return ""
+		return ""
+	}
+
+	if manifestFile == nil {
+		return ""
+	}
+
+	var manifest Manifest
+
+	err = json.Unmarshal(manifestFile, &manifest)
+
+	if err != nil {
+		fmt.Println(err)
+
+		return ""
+	}
+
+	tags := utils.Map(entrypoints, func(entrypoint string) string {
+		return v.getChunkFromManifest(manifest, entrypoint)
+	})
+
+	return strings.Join(tags, "\n")
 }
 
 func (v *Vite) hotFilePath() string {
-	return v.publicPath + "/" + "hot"
+	return path.Join(v.publicPath, "hot")
 }
 
 func (v *Vite) hotAsset(asset string) string {
@@ -189,7 +235,14 @@ func (v *Vite) hotAsset(asset string) string {
 		return ""
 	}
 
-	return strings.Trim(string(fileContents), " ") + "/" + asset
+	assetPath, err := url.JoinPath(strings.Trim(string(fileContents), " "), asset)
+
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+
+	return assetPath
 }
 
 func (v *Vite) ReactRefresh() string {
